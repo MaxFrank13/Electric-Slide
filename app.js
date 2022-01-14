@@ -20,7 +20,7 @@ const mouse = {
   y: undefined,
 }
 // physics
-const gravity = 4.5;
+const gravity = 3.5;
 
 // game counters
 let gameEnd = false;
@@ -51,6 +51,7 @@ class Player {
     this.color = "green";
     this.momentum = false;
     this.boost = 0;
+    this.grind = false;
   }
 
   draw() {
@@ -60,12 +61,12 @@ class Player {
   }
   update() {
     this.draw();
+
     this.position.y += this.velocity.y;
-    if (this.position.y + this.height + this.velocity.y < canvas.height - 100) {
+    if (this.position.y + this.height + this.velocity.y < canvas.height - 75) {
       this.velocity.y += gravity;
     } else {
       this.velocity.y = 0;
-      this.position.y = canvas.height - 100;
     }
   }
 }
@@ -140,7 +141,7 @@ startBtn.addEventListener("click", function() {
 
 // arrow keys
 window.addEventListener("keydown", function (e) {
-
+  console.log(player.velocity.y, player.position.y + player.height <= canvas.height)
   switch (e.key) {
     case "ArrowUp":
       if (player.position.y + player.height <= canvas.height && player.velocity.y === 0 && e.ctrlKey) {
@@ -157,6 +158,7 @@ window.addEventListener("keydown", function (e) {
       keysPressed.right = true;
       break;
   }
+  console.log(player.velocity.y);
 })
 window.addEventListener("keyup", function (e) {
 
@@ -192,7 +194,7 @@ function checkDirection() {
 }
 
 function scrollBackground() {
-  console.log(scrollOffset);
+  // console.log(scrollOffset);
   if (keysPressed.right && player.momentum && player.position.x + player.width > canvas.width / 2 - 200) {
     scrollOffset += player.velocity.x;
     platforms.forEach((platform) => {
@@ -244,17 +246,20 @@ function checkCollision() {
       (keysPressed.right || keysPressed.left)
     ) {
       player.velocity.y = 0;
+      player.grind = true;
+      console.log(player.grind);
+
       if (player.position.y < 150 && keysPressed.right) {
         points += 3;
         score.textContent = points;
-
         particlesArray.push(new Particle());
+        player.position.y = platform.position.y - player.height;
 
       } else if (keysPressed.right) {
         points += 2;
         score.textContent = points;
-
         particlesArray.push(new Particle());
+        player.position.y = platform.position.y - player.height;
       }
     } else if (
       player.position.y + player.height <= platform.position.y &&
@@ -262,9 +267,11 @@ function checkCollision() {
       player.position.x + player.width >= platform.position.x &&
       player.position.x < platform.position.x + platform.width
     ) {
+      player.grind = true;
       player.velocity.y = 0;
       player.position.y = platform.position.y - player.height;
-    }
+      console.log(player.grind);
+    } 
   })
 }
 
@@ -276,7 +283,7 @@ function drawFloor() {
   gradient.addColorStop(0.5, `hsl(111, 100%, 86%)`);
   gradient.addColorStop(1, `hsl(191, 100%, 15%)`);
   ctx.fillStyle = gradient;
-  ctx.fillRect(0, canvas.height - 100 + player.height, canvas.width, canvas.height);
+  ctx.fillRect(0, canvas.height - 75, canvas.width, canvas.height);
 }
 
 function endFlag() {
@@ -322,11 +329,11 @@ function animate() {
   platforms.forEach((platform) => {
     platform.draw();
   });
+  checkCollision();
   drawFloor();
   handleParticles();
   scrollBackground();
   speedBoost();
-  checkCollision();
   endFlag();
   hue++;
   requestAnimationFrame(animate);
