@@ -1,16 +1,64 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Platformer</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css" />
   <link rel="stylesheet" href="assets/styles.css">
 </head>
+
 <body>
-  <h1 class="score">0</h1>
-  <button class="start-btn">START</button>
-  <canvas></canvas>
+  <main>
+    <div class="menu-container">
+      <h1 class="title">Electric <span>Slide</span></h1>
+      <section class="start-menu">
+        <button class="start btn">start</button>
+        <button class="hs btn">highscores</button>
+        <button class="controls btn">controls</button>
+        <a href="https://github.com/MaxFrank13/Platformer-game" target="_blank" class="source btn">code</a>
+      </section>
+    </div>
+    <div class="highscore-overlay hide">
+      <div class="highscore-container">
+        <h2>Highscores</h2>
+        <ol class="scores">
+        </ol>
+        <i class="fas fa-level-up-alt return"></i>
+      </div>
+    </div>
+    <div class="controls-overlay hide">
+      <div class="controls-container">
+        <h2>Controls</h2>
+        <ul>
+          <li>Press Left & Right arrowkeys or A & D to control player movement</li>
+          <li>Press Up or W to jump. Hold CTRL to perform a super jump</li>
+          <li>Slide on rails to gain points</li>
+          <li>Rails that are close to the top are worth extra points</li>
+          <li>Points multiplier gets reset when the player touches the ground</li>
+          <li>Going backwards will cost points</li>
+        </ul>
+        <i class="fas fa-window-minimize close"></i>
+      </div>
+    </div>
+  </main>
+
+  <section class="game hide">
+    <h1 class="score">0</h1>
+    <h1 class="multiplier"></h1>
+    <canvas id="canvas"></canvas>
+  </section>
+
+
+  <div class="modal-overlay hide">
+    <div class="initials-prompt">
+      <label for="initials">Enter your initials:</label>
+      <input type="text" id="initials" name="initials">
+    </div>
+  </div>
   <script src="app.js"></script>r
 </body>
+
 </html>

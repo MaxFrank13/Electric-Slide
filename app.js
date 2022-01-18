@@ -2,12 +2,33 @@
 
 const canvas = document.querySelector("canvas");
 const ctx = canvas.getContext("2d");
-canvas.width = window.innerWidth;
-canvas.height = "600";
+canvas.width = "1420";
+canvas.height = "800";
 
-// selectors
-const score = document.querySelector("h1");
-const startBtn = document.querySelector(".start-btn");
+// **** Selectors ****
+
+// elements
+const main_El = document.querySelector("main");
+const title_El = document.querySelector(".title");
+const menu_El = document.querySelector(".menu-container");
+const game_El = document.querySelector(".game");
+const score_El = document.querySelector(".score");
+const multiplier_El = document.querySelector(".multiplier")
+// buttons
+const startBtn = document.querySelector(".start");
+const hsBtn = document.querySelector(".hs");
+const controlsBtn = document.querySelector(".controls");
+const sourceBtn = document.querySelector(".source");
+const returnBtn = document.querySelector(".return");
+const closeBtn = document.querySelector(".close");
+// highscores
+const highscores_div = document.querySelector(".highscore-overlay");
+const scoresList = document.querySelector(".scores");
+const modalOverlay = document.querySelector(".modal-overlay");
+const initialsInput = document.getElementById("initials");
+// controls
+const controls_div = document.querySelector(".controls-overlay");
+
 // **** Global Variables ****
 
 // keys & mouse
@@ -23,14 +44,26 @@ const mouse = {
 const gravity = 3.5;
 
 // game counters
+let mainScreen = true;
 let gameEnd = false;
 let scrollOffset = 0;
 let points = 0;
+let multiplierTime = 0;
+let multiplier = 1;
 
 
-// animations 
+// animations
+let animateTitle;
+let gameAnimation;
+let degrees = 0;
 let hue = 100;
 let particlesArray = [];
+let fireworksArray = [];
+
+// highscores
+let initials;
+let highscoresArray = [];
+
 
 
 // **** Game Objects ****
@@ -39,7 +72,7 @@ class Player {
   constructor() {
     this.position = {
       x: 300,
-      y: canvas.height - 100
+      y: 250
     }
     this.velocity = {
       x: 8,
@@ -63,10 +96,14 @@ class Player {
     this.draw();
 
     this.position.y += this.velocity.y;
-    if (this.position.y + this.height + this.velocity.y < canvas.height - 75) {
+    if (this.position.y + this.height + this.velocity.y <= canvas.height - 75) {
       this.velocity.y += gravity;
     } else {
       this.velocity.y = 0;
+      player.grind = false;
+      multiplier = 1;
+      multiplierTime = 0;
+      multiplier_El.textContent = "";
     }
   }
 }
@@ -77,7 +114,7 @@ class Platform {
       x,
       y
     }
-    this.width = 650;
+    this.width = 950;
     this.height = 30;
   }
   draw() {
@@ -92,22 +129,13 @@ class Platform {
 
 const player = new Player();
 const platforms = [];
-for (let i = 0; i < 20; i++) {
-  platforms.push(new Platform({ x: 1050 + (4500 * i), y: 420 - Math.random() * 10 * i }));
-  platforms.push(new Platform({ x: 1200 + (4500 * i), y: 150 + Math.random() * 10 * i }));
-  platforms.push(new Platform({ x: 2050 + (4500 * i), y: 200 - Math.random() * 10 * i }));
-  platforms.push(new Platform({ x: 2850 + (4500 * i), y: 250 + Math.random() * 10 * i }));
-  platforms.push(new Platform({ x: 3250 + (4500 * i), y: 350 - Math.random() * 10 * i }));
-  platforms.push(new Platform({ x: 3850 + (4500 * i), y: 420 + Math.random() * 10 * i }));
-  platforms.push(new Platform({ x: 4350 + (4500 * i), y: 270 - Math.random() * 10 * i }));
-}
 
 // **** Animation Objects ****
 
 class Particle {
-  constructor() {
-    this.x = player.position.x;
-    this.y = player.position.y + player.height;
+  constructor(x, y) {
+    this.x = x;
+    this.y = y;
     this.size = Math.random() * 8 + 1;
     this.speedX = Math.random() * 1 - 3.5;
     this.speedY = Math.random() * 1.5 - 2;
@@ -126,58 +154,108 @@ class Particle {
   }
 }
 
+
 // **** Event listeners ****
 
-// resizing
+// main menu
 
-window.addEventListener("resize", function(){
-  canvas.width = window.innerWidth;
+window.addEventListener("DOMContentLoaded", function () {
+  titleAnimation();
+  getLocalStorage();
 })
 
-// game start
-startBtn.addEventListener("click", function() {
+startBtn.addEventListener("click", function () {
+  for (let i = 1; i < 125; i++) {
+    platforms.push(new Platform({ x: Math.random() * canvas.width + (canvas.width / 2 * i), y: Math.random() * (canvas.height - 100) }));
+  }
+  game_El.classList.remove("hide");
+  main_El.classList.add("hide");
+  mainScreen = false;
   animate();
 });
 
-// arrow keys
-window.addEventListener("keydown", function (e) {
-  console.log(player.velocity.y, player.position.y + player.height <= canvas.height)
-  switch (e.key) {
-    case "ArrowUp":
-      if (player.position.y + player.height <= canvas.height && player.velocity.y === 0 && e.ctrlKey) {
-        player.velocity.y -= 80;
-      } else
-        if (player.position.y + player.height <= canvas.height && player.velocity.y === 0) {
-          player.velocity.y -= 50;
-        }
-      break;
-    case "ArrowLeft":
-      keysPressed.left = true;
-      break;
-    case "ArrowRight":
-      keysPressed.right = true;
-      break;
-  }
-  console.log(player.velocity.y);
-})
-window.addEventListener("keyup", function (e) {
+hsBtn.addEventListener("click", function () {
+  menu_El.classList.add("hide");
+  highscores_div.classList.remove("hide");
+});
 
-  switch (e.key) {
-    case "ArrowLeft":
-      keysPressed.left = false;
-      break;
-    case "ArrowRight":
-      keysPressed.right = false;
-      break;
+returnBtn.addEventListener("click", function() {
+  menu_El.classList.remove("hide");
+  highscores_div.classList.add("hide");
+  if (gameEnd) {
+    window.location.reload(true);
+    gameEnd = false;
+  }
+});
+
+controlsBtn.addEventListener("click", function() {
+  controls_div.classList.remove("hide");
+});
+
+closeBtn.addEventListener("click", function() {
+  controls_div.classList.add("hide");
+})
+
+
+// arrow keys
+
+window.addEventListener("keydown", function (e) {
+  if (e.key === "ArrowUp" || e.key === "w") {
+    if (player.position.y + player.height <= canvas.height && player.velocity.y === 0 && e.ctrlKey) {
+      player.velocity.y -= 85;
+    } else if (player.position.y + player.height <= canvas.height && player.velocity.y === 0) {
+      player.velocity.y -= 60;
+    }
+  } else if (e.key === "ArrowLeft" || e.key === "a") {
+    keysPressed.left = true;
+  } else if (e.key === "ArrowRight" || e.key === "d") {
+    keysPressed.right = true;
+  }
+
+  if (e.key === "Tab" && e.target.innerHTML === "code") {
+    e.preventDefault();
+    startBtn.focus();
+  } else if (e.key === "Tab" && gameEnd){
+    cancelAnimationFrame(gameAnimation);
+    modalOverlay.classList.remove('hide');
+  }
+
+  if (e.key === "Enter" && !modalOverlay.classList.contains("hide")) {
+    e.preventDefault();
+    initials = initialsInput.value;
+    let record = {
+      name: initials,
+      number: points
+    }
+    sortScores(record);
+    renderScores(highscoresArray);
+    setLocalStorage();
+    modalOverlay.classList.add("hide");
+    game_El.classList.add("hide");
+    main_El.classList.remove("hide");
+    menu_El.classList.add("hide");
+    highscores_div.classList.remove("hide");
+    titleAnimation();
+  }
+})
+
+window.addEventListener("keyup", function (e) {
+  if (e.key === "ArrowLeft" || e.key === "a") {
+    keysPressed.left = false;
+  } else if (e.key === "ArrowRight" || e.key === "d") {
+    keysPressed.right = false;
   }
 })
 
 // mouse
-canvas.addEventListener("click", function (e) {
-  mouse.x = e.x;
-  mouse.y = e.y;
-  for (let i = 0; i < 3; i++) {
-    particlesArray.push(new Particle());
+
+canvas.addEventListener("mousemove", function (e) {
+  if (gameEnd) {
+    mouse.x = e.x;
+    mouse.y = e.y;
+    for (let i = 0; i < 2; i++) {
+      particlesArray.push(new Particle(mouse.x, mouse.y));
+    }
   }
 });
 
@@ -186,51 +264,46 @@ canvas.addEventListener("click", function (e) {
 // Movement and Scroll
 
 function checkDirection() {
-  if (keysPressed.right && player.position.x + player.width < canvas.width / 2 - 200) {
-    player.position.x += player.velocity.x;
-  } else if (keysPressed.left && player.position.x > 200) {
-    player.position.x -= player.velocity.x;
+  if (!gameEnd) {
+    if (keysPressed.right && player.position.x + player.width < canvas.width / 2 - 200) {
+      player.position.x += player.velocity.x;
+    } else if (keysPressed.left && player.position.x > 200) {
+      player.position.x -= player.velocity.x;
+    }
   }
 }
 
 function scrollBackground() {
-  // console.log(scrollOffset);
-  if (keysPressed.right && player.momentum && player.position.x + player.width > canvas.width / 2 - 200) {
-    scrollOffset += player.velocity.x;
-    platforms.forEach((platform) => {
-      platform.position.x -= player.velocity.x;
-    })
-  } else if (keysPressed.right && player.position.x + player.width > canvas.width / 2 - 200) {
-    scrollOffset += player.velocity.x;
-    platforms.forEach((platform) => {
-      platform.position.x -= player.velocity.x;
-    })
-  } else if (keysPressed.left && player.position.x < 200) {
-    scrollOffset -= player.velocity.x;
-    points--;
-    score.textContent = points;
-    platforms.forEach((platform) => {
-      platform.position.x += player.velocity.x;
-    })
+  if (!gameEnd) {
+    if (keysPressed.right && player.position.x + player.width > canvas.width / 2 - 200) {
+      scrollOffset += player.velocity.x;
+      platforms.forEach((platform) => {
+        platform.position.x -= player.velocity.x;
+      })
+    } else if (keysPressed.left && player.position.x < 200) {
+      scrollOffset -= player.velocity.x;
+      points--;
+      score_El.textContent = points;
+      platforms.forEach((platform) => {
+        platform.position.x += player.velocity.x;
+      })
+    }
   }
 }
 
-function speedBoost() {
+function speedControl() {
   if (
-    (keysPressed.right && player.velocity.x <= 20) ||
-    (keysPressed.left && player.velocity.x <= 20)
+    (keysPressed.right && player.velocity.x <= 30) ||
+    (keysPressed.left && player.velocity.x <= 30)
   ) {
     player.boost += 0.002;
     player.velocity.x += player.boost;
-    console.log("boosting");
-    player.momentum = true;
     checkDirection();
   } else if (keysPressed.right || keysPressed.left) {
     checkDirection();
   } else {
     player.boost = 0;
     player.velocity.x = 8;
-    player.momentum = false;
   }
 }
 
@@ -242,43 +315,79 @@ function checkCollision() {
       player.position.y + player.height <= platform.position.y &&
       player.position.y + player.height + player.velocity.y >= platform.position.y &&
       player.position.x + player.width >= platform.position.x &&
-      player.position.x < platform.position.x + platform.width &&
-      (keysPressed.right || keysPressed.left)
+      player.position.x <= platform.position.x + platform.width
     ) {
       player.velocity.y = 0;
+      player.position.y = platform.position.y - player.height;
       player.grind = true;
-      console.log(player.grind);
+
 
       if (player.position.y < 150 && keysPressed.right) {
         points += 3;
-        score.textContent = points;
-        particlesArray.push(new Particle());
-        player.position.y = platform.position.y - player.height;
+        score_El.textContent = points;
+        particlesArray.push(new Particle(player.position.x, player.position.y + player.height));
 
       } else if (keysPressed.right) {
         points += 2;
-        score.textContent = points;
-        particlesArray.push(new Particle());
-        player.position.y = platform.position.y - player.height;
+        score_El.textContent = points;
+        particlesArray.push(new Particle(player.position.x, player.position.y + player.height));
       }
-    } else if (
-      player.position.y + player.height <= platform.position.y &&
-      player.position.y + player.height + player.velocity.y >= platform.position.y &&
-      player.position.x + player.width >= platform.position.x &&
-      player.position.x < platform.position.x + platform.width
-    ) {
-      player.grind = true;
-      player.velocity.y = 0;
-      player.position.y = platform.position.y - player.height;
-      console.log(player.grind);
-    } 
+    }
   })
+}
+
+function pointsMultiplier() {
+  if (player.grind && keysPressed.right) {
+
+    multiplierTime++
+    if (multiplierTime > 250) {
+      multiplier = Math.floor(multiplierTime / 250) * 2;
+      multiplier_El.textContent = `${multiplier}x`;
+    }
+
+  }
+}
+
+// Highscores
+
+function sortScores(record) {
+  for (let i = 0; i < highscoresArray.length; i++) {
+    if (record.number > highscoresArray[i].number) {
+      return highscoresArray.splice(i, 0, record);
+    }
+  }
+  return highscoresArray.push(record);
+}
+
+function renderScores(object) {
+  scoresList.innerHTML = "";
+  for (let i = 0; i < object.length; i++) {
+    let newScore = document.createElement("li");
+    let entry = document.createTextNode(`${object[i].name} ${object[i].number}`);
+    newScore.appendChild(entry);
+    newScore.classList.add("entry");
+    scoresList.appendChild(newScore);
+  }
+}
+
+// Local Storage
+
+function setLocalStorage() {
+  localStorage.setItem("electricSlideHS", JSON.stringify(highscoresArray));
+}
+
+function getLocalStorage() {
+  if (localStorage.getItem("electricSlideHS")) {
+    highscoresArray = JSON.parse(localStorage.getItem("electricSlideHS"));
+    renderScores(highscoresArray);
+  }
 }
 
 // Animations
 
+
 function drawFloor() {
-  let gradient = ctx.createLinearGradient(0, canvas.height - 100 + player.height, canvas.width, canvas.height)
+  let gradient = ctx.createLinearGradient(0, canvas.height - 50, canvas.width, canvas.height)
   gradient.addColorStop(0, `hsl(191, 100%, 15%)`);
   gradient.addColorStop(0.5, `hsl(111, 100%, 86%)`);
   gradient.addColorStop(1, `hsl(191, 100%, 15%)`);
@@ -286,13 +395,15 @@ function drawFloor() {
   ctx.fillRect(0, canvas.height - 75, canvas.width, canvas.height);
 }
 
-function endFlag() {
-  if (scrollOffset >= 92000) {
-    gameEnd = true;
-    ctx.fillStyle = "red";
-    ctx.fillRect(600, canvas.height - 100, 50, 100);
+function endingAnimation() {
+  gameEnd = true;
+  if (player.position.x < canvas.width) {
+    player.position.x += 15;
+    particlesArray.push(new Particle(player.position.x, player.position.y + player.height));
   }
 }
+
+
 function handleParticles() {
   for (let i = 0; i < particlesArray.length; i++) {
     particlesArray[i].update();
@@ -318,23 +429,33 @@ function handleParticles() {
   }
 }
 
+// **** Animation loop ****
 
-// Animation loop
+function titleAnimation() {
+  main_El.style.background = `linear-gradient(${degrees}deg,   black, var(--pink-50), var(--pink-70), transparent)`
+  degrees++;
+  animateTitle = requestAnimationFrame(titleAnimation);
+}
 
 function animate() {
+  cancelAnimationFrame(animateTitle);
+  gameAnimation = requestAnimationFrame(animate);
   ctx.fillStyle = "rgba(0,0,0, 0.5)";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillRect(0, 0, canvas.width, canvas.height - 75);
   player.update();
   player.draw();
   platforms.forEach((platform) => {
     platform.draw();
   });
-  checkCollision();
   drawFloor();
+  checkCollision();
+  pointsMultiplier();
   handleParticles();
+  speedControl();
   scrollBackground();
-  speedBoost();
-  endFlag();
   hue++;
-  requestAnimationFrame(animate);
+  if (scrollOffset >= 2000) {
+    endingAnimation();
+  }
+  console.log("still firing");
 }
