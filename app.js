@@ -454,7 +454,7 @@ function animate() {
   speedControl();
   scrollBackground();
   hue++;
-  if (scrollOffset >= 2000) {
+  if (scrollOffset >= 92000) {
     endingAnimation();
   }
   console.log("still firing");
