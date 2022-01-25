@@ -171,7 +171,7 @@ startBtn.addEventListener("click", function () {
   game_El.classList.remove("hide");
   main_El.classList.add("hide");
   mainScreen = false;
-  animate();
+  startGame(59);
 });
 
 hsBtn.addEventListener("click", function () {
@@ -179,7 +179,7 @@ hsBtn.addEventListener("click", function () {
   highscores_div.classList.remove("hide");
 });
 
-returnBtn.addEventListener("click", function() {
+returnBtn.addEventListener("click", function () {
   menu_El.classList.remove("hide");
   highscores_div.classList.add("hide");
   if (gameEnd) {
@@ -188,11 +188,11 @@ returnBtn.addEventListener("click", function() {
   }
 });
 
-controlsBtn.addEventListener("click", function() {
+controlsBtn.addEventListener("click", function () {
   controls_div.classList.remove("hide");
 });
 
-closeBtn.addEventListener("click", function() {
+closeBtn.addEventListener("click", function () {
   controls_div.classList.add("hide");
 })
 
@@ -215,7 +215,7 @@ window.addEventListener("keydown", function (e) {
   if (e.key === "Tab" && e.target.innerHTML === "code") {
     e.preventDefault();
     startBtn.focus();
-  } else if (e.key === "Tab" && gameEnd){
+  } else if (e.key === "Tab" && gameEnd) {
     cancelAnimationFrame(gameAnimation);
     modalOverlay.classList.remove('hide');
   }
@@ -430,6 +430,14 @@ function handleParticles() {
 }
 
 // **** Animation loop ****
+let fps, fpsInterval, startTime, current, start, elapsed;
+
+function startGame(fps) {
+  fpsInterval = 1000 / fps;
+  start = Date.now();
+  startTime = start;
+  animate();
+}
 
 function titleAnimation() {
   main_El.style.background = `linear-gradient(${degrees}deg,   black, var(--pink-50), var(--pink-70), transparent)`
@@ -440,22 +448,26 @@ function titleAnimation() {
 function animate() {
   cancelAnimationFrame(animateTitle);
   gameAnimation = requestAnimationFrame(animate);
-  ctx.fillStyle = "rgba(0,0,0, 0.5)";
-  ctx.fillRect(0, 0, canvas.width, canvas.height - 75);
-  player.update();
-  player.draw();
-  platforms.forEach((platform) => {
-    platform.draw();
-  });
-  drawFloor();
-  checkCollision();
-  pointsMultiplier();
-  handleParticles();
-  speedControl();
-  scrollBackground();
-  hue++;
-  if (scrollOffset >= 92000) {
-    endingAnimation();
+  current = Date.now();
+  elapsed = current - start;
+  if (elapsed > fpsInterval) {
+    start = current - (elapsed % fpsInterval);
+    ctx.fillStyle = "rgba(0,0,0, 0.5)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height - 75);
+    player.update();
+    player.draw();
+    platforms.forEach((platform) => {
+      platform.draw();
+    });
+    drawFloor();
+    checkCollision();
+    pointsMultiplier();
+    handleParticles();
+    speedControl();
+    scrollBackground();
+    hue++;
+    if (scrollOffset >= 92000) {
+      endingAnimation();
+    }
   }
-  console.log("still firing");
 }
