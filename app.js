@@ -200,8 +200,9 @@ closeBtn.addEventListener("click", function () {
 // arrow keys
 
 window.addEventListener("keydown", function (e) {
-  if (e.key === "ArrowUp" || e.key === "w") {
-    if (player.position.y + player.height <= canvas.height && player.velocity.y === 0 && e.ctrlKey) {
+  console.log(e);
+  if (e.key === "ArrowUp" || e.key === "w" || e.key === "W") {
+    if (player.position.y + player.height <= canvas.height && player.velocity.y === 0 && e.shiftKey) {
       player.velocity.y -= 85;
     } else if (player.position.y + player.height <= canvas.height && player.velocity.y === 0) {
       player.velocity.y -= 60;
