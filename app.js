@@ -171,7 +171,7 @@ startBtn.addEventListener("click", function () {
   game_El.classList.remove("hide");
   main_El.classList.add("hide");
   mainScreen = false;
-  startGame(59);
+  startGame(59.99);
 });
 
 hsBtn.addEventListener("click", function () {
@@ -252,8 +252,9 @@ window.addEventListener("keyup", function (e) {
 
 canvas.addEventListener("mousemove", function (e) {
   if (gameEnd) {
-    mouse.x = e.x;
-    mouse.y = e.y;
+    mouse.x = e.offsetX;
+    mouse.y = e.offsetY;
+    console.log(e);
     for (let i = 0; i < 2; i++) {
       particlesArray.push(new Particle(mouse.x, mouse.y));
     }
