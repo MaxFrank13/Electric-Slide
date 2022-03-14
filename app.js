@@ -22,6 +22,7 @@ const sourceBtn = document.querySelector(".source");
 const returnBtn = document.querySelector(".return");
 const closeBtn = document.querySelector(".close");
 // highscores
+const notification = document.querySelector(".notification")
 const highscores_div = document.querySelector(".highscore-overlay");
 const scoresList = document.querySelector(".scores");
 const modalOverlay = document.querySelector(".modal-overlay");
@@ -398,6 +399,7 @@ function drawFloor() {
 }
 
 function endingAnimation() {
+  notification.classList.remove('hide');
   gameEnd = true;
   if (player.position.x < canvas.width) {
     player.position.x += 15;
@@ -468,7 +470,7 @@ function animate() {
     speedControl();
     scrollBackground();
     hue++;
-    if (scrollOffset >= 92000) {
+    if (scrollOffset >= 2000) {
       endingAnimation();
     }
   }

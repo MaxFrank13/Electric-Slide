@@ -7,7 +7,7 @@ Welcome to Electric Slide! This is a simple platformer game built using vanilla 
 
 [Electric Slide](https://maxfrank13.github.io/Electric-Slide/)
 
-![Photo of Password Generator](https://github.com/MaxFrank13/Electric-Slide/blob/main/assets/Electric-Slide.jpg)
+![Photo of Electric Slide menu](https://github.com/MaxFrank13/Electric-Slide/blob/main/assets/Electric-Slide.jpg)
 
 
 ## The Code
