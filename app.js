@@ -27,8 +27,10 @@ const highscores_div = document.querySelector(".highscore-overlay");
 const scoresList = document.querySelector(".scores");
 const modalOverlay = document.querySelector(".modal-overlay");
 const initialsInput = document.getElementById("initials");
+const tabNotifcation = document.querySelector(".notification");
 // controls
 const controls_div = document.querySelector(".controls-overlay");
+
 
 // **** Global Variables ****
 
@@ -172,7 +174,7 @@ startBtn.addEventListener("click", function () {
   game_El.classList.remove("hide");
   main_El.classList.add("hide");
   mainScreen = false;
-  startGame(59.99);
+  animate();
 });
 
 hsBtn.addEventListener("click", function () {
@@ -203,7 +205,7 @@ closeBtn.addEventListener("click", function () {
 window.addEventListener("keydown", function (e) {
   e.preventDefault();
   if (e.key === "ArrowUp" || e.key === "w") {
-    if (player.position.y + player.height <= canvas.height && player.velocity.y === 0 && e.altKey) {
+    if (player.position.y + player.height <= canvas.height && player.velocity.y === 0 && e.ctrlKey) {
       player.velocity.y -= 85;
     } else if (player.position.y + player.height <= canvas.height && player.velocity.y === 0) {
       player.velocity.y -= 60;
@@ -237,6 +239,7 @@ window.addEventListener("keydown", function (e) {
     main_El.classList.remove("hide");
     menu_El.classList.add("hide");
     highscores_div.classList.remove("hide");
+    tabNotifcation.classList.add("hide");
     titleAnimation();
   }
 })
@@ -452,10 +455,10 @@ function titleAnimation() {
 function animate() {
   cancelAnimationFrame(animateTitle);
   gameAnimation = requestAnimationFrame(animate);
-  current = Date.now();
-  elapsed = current - start;
-  if (elapsed > fpsInterval) {
-    start = current - (elapsed % fpsInterval);
+  // current = Date.now();
+  // elapsed = current - start;
+  // if (elapsed > fpsInterval) {
+    // start = current - (elapsed % fpsInterval);
     ctx.fillStyle = "rgba(0,0,0, 0.5)";
     ctx.fillRect(0, 0, canvas.width, canvas.height - 75);
     player.update();
@@ -473,5 +476,5 @@ function animate() {
     if (scrollOffset >= 92000) {
       endingAnimation();
     }
-  }
+  // }
 }
