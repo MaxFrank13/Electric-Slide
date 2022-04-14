@@ -203,16 +203,16 @@ closeBtn.addEventListener("click", function () {
 // arrow keys
 
 window.addEventListener("keydown", function (e) {
-  e.preventDefault();
-  if (e.key === "ArrowUp" || e.key === "w") {
+
+  if (e.key === "ArrowUp") {
     if (player.position.y + player.height <= canvas.height && player.velocity.y === 0 && e.ctrlKey) {
       player.velocity.y -= 85;
     } else if (player.position.y + player.height <= canvas.height && player.velocity.y === 0) {
       player.velocity.y -= 60;
     }
-  } else if (e.key === "ArrowLeft" || e.key === "a") {
+  } else if (e.key === "ArrowLeft") {
     keysPressed.left = true;
-  } else if (e.key === "ArrowRight" || e.key === "d") {
+  } else if (e.key === "ArrowRight") {
     keysPressed.right = true;
   }
 
